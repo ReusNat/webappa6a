@@ -17,4 +17,12 @@ from models import User
 
 @app.route('/')
 def index():
-    return 'Results of GET /'
+    return render_template('login.html')
+
+@app.route('/login/', methods=['GET'])
+def get_login():
+    return render_template('login.html')
+
+@app.route('/login/', methods=['POST'])
+def login():
+    return 'hi'
