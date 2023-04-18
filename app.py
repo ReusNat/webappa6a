@@ -3,15 +3,32 @@ from flask import (
     session, url_for
 )
 from flask_sqlalchemy import SQLAlchemy
+from pathlib import Path
+from models import Profile, Post, Like
 import os
 
 app = Flask(__name__)
-app.secret_key = b'REPLACE_ME_x#pi*CO0@^z_beep_beep_boop_boop'
+app.secret_key = b'bvfreheuwbvuorbvygfbchudevcgufegvy8ferhfu834jd3e9-fhcu90rfv'
 
-sqlite_uri = 'sqlite:///' + os.path.abspath(os.path.curdir) + '/test.db'
+sqlite_uri = 'sqlite:///' + os.path.abspath(os.path.curdir) + '/profiles.db'
 app.config['SQLALCHEMY_DATABASE_URI'] = sqlite_uri
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
+
+
+IMAGE_DIR = 'static/img/profilephotos'
+
+
+@app.before_first_request
+def app_init():
+    imgdir = Path(IMAGE_DIR)
+    if not imgdir.exists():
+        imgdir.mkdir(parents=True)
+
+        try:
+            Profile.query.all()
+        except Exception:
+            db.create_all()
 
 
 def get_username():
@@ -62,6 +79,19 @@ def login():
     else:
         return render_template('login_form.html',
                                messages=['Invalid username/password'])
+
+
+@app.route('/profile/new/', methods=['GET'])
+def new_user_form():
+    return render_template('new_user.html')
+
+
+@app.route('/profile/', methods=['POST'])
+def new_user():
+    username = request.form['username']
+    password = request.form['password']
+    email = request.form['email']
+    pp = request.form['profile-pict']
 
 
 @app.route('/logout/')

@@ -4,7 +4,8 @@ from appserver import db
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.String(144), unique=False, nullable=False)
-    profile_id = db.Column(db.Integer, db.ForeignKey('profile.id'), nullable=False)
+    profile_id = db.Column(db.Integer, db.ForeignKey('profile.id'),
+                           nullable=False)
     likes = db.relationship('Like', backref='post', uselist=True, lazy=True)
 
     def liked_by(self):
@@ -47,7 +48,8 @@ class Profile(db.Model):
 
 class Like(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    profile_id = db.Column(db.Integer, db.ForeignKey('profile.id'), nullable=False)
+    profile_id = db.Column(db.Integer, db.ForeignKey('profile.id'),
+                           nullable=False)
     post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
     profile = db.relationship('Profile', uselist=False, lazy=True)
     # This doesn't work because a post does not have a single like.
