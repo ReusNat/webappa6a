@@ -3,8 +3,9 @@ from flask import (
     session, url_for
 )
 from flask_sqlalchemy import SQLAlchemy
-from pathlib import Path
+from werkzeug.utils import secure_filename
 import os
+from pathlib import Path
 
 app = Flask(__name__)
 app.secret_key = b'bvfreheuwbvuorbvygfbchudevcgufegvy8ferhfu834jd3e9-fhcu90rfv'
@@ -14,10 +15,9 @@ app.config['SQLALCHEMY_DATABASE_URI'] = sqlite_uri
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
-from models import Profile, Post, Like
-
 IMAGE_DIR = 'static/img/profilephotos'
 
+from models import Profile, Post, Like
 
 @app.before_first_request
 def app_init():
@@ -91,23 +91,39 @@ def new_user_form():
 
 @app.route('/profile/', methods=['POST'])
 def new_user():
-    username = request.form['username']
-    password = request.form['password']
-    email = request.form['email']
-    pp = request.form['profile-pict']
+    un = request.form['username']
+    pw = request.form['password']
+    e = request.form['email']
+    pp = request.files['profile-pict']
+    filename = secure_filename(pp.filename)
+    filepath = os.path.join(IMAGE_DIR, filename)
+    exists = db.session.query(db.session.query(Profile).filter_by(username=un).exists()).scalar()
 
-    exists = db.session.query(db.session.query(Profile).filter_by(username=username).exists()).scalar()
-
-    if exists == True:
+    if pp:
+      if username == "":
         return render_template('new_user.html',
-                               message=f'The username {username} is already taken.')
+                                message='Please enter a username.')
+      elif password == "":
+        return render_template('new_user.html',
+                                message='Please enter a password.')
+      elif email == "":
+        return render_template('new_user.html',
+                                message='Please enter an email.')
+      else:
+        if exists:
+          return render_template('new_user.html',
+                                 message=f'The username {username} is already taken.')
+        else:
+          pp.save(filepath)
+          new_user = Profile(username=un, password=pw, email=e, photofn=filename)
+          db.session.add(new_user)
+          db.session.commit()
+          return redirect(url_for('login'))
     else:
-      new_user = Profile(username=username, password=password, email=email, photofn=pp)
+      return render_template('new_user.html',
+                             message='Please choose a profile picture.')
 
-      db.session.add(new_user)
-      db.session.commit()
-      return redirect(url_for('login'))
-
+    return abort(400)
 
 @app.route('/logout/')
 def logout():
