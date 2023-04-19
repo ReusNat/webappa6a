@@ -4,7 +4,6 @@ from flask import (
 )
 from flask_sqlalchemy import SQLAlchemy
 from pathlib import Path
-from models import Profile, Post, Like
 import os
 
 app = Flask(__name__)
@@ -15,6 +14,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = sqlite_uri
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
+from models import Profile, Post, Like
 
 IMAGE_DIR = 'static/img/profilephotos'
 
@@ -25,10 +25,10 @@ def app_init():
     if not imgdir.exists():
         imgdir.mkdir(parents=True)
 
-        try:
-            Profile.query.all()
-        except Exception:
-            db.create_all()
+    try:
+        Profile.query.all()
+    except Exception:
+        db.create_all()
 
 
 def get_username():
@@ -39,7 +39,9 @@ def get_username():
 
 
 def authenticate(username, password):
-    if username == 'cartman' and password == 'beefcake':
+    user_exists = db.session.query(db.session.query(Profile).filter_by(username=username).exists()).scalar()
+    user = Profile.query.filter_by(username=username).first()
+    if username == 'cartman' and password == 'beefcake' or user_exists == True and user.password == password:
         session['username'] = username
         return True
 
@@ -47,7 +49,7 @@ def authenticate(username, password):
 
 
 def is_secure_route(request):
-    return request.path not in ['/login/', '/logout/'] and \
+    return request.path not in ['/login/', '/logout/', '/profile/new/', '/profile/'] and \
         not request.path.startswith('/static/')
 
 
@@ -64,7 +66,8 @@ def index():
 
 @app.route('/main/')
 def main():
-    return render_template('main.html', username=get_username())
+    username = get_username()
+    return render_template('main.html', message=f'Welcome {username}!')
 
 
 @app.route('/login/', methods=['GET'])
@@ -92,6 +95,18 @@ def new_user():
     password = request.form['password']
     email = request.form['email']
     pp = request.form['profile-pict']
+
+    exists = db.session.query(db.session.query(Profile).filter_by(username=username).exists()).scalar()
+
+    if exists == True:
+        return render_template('new_user.html',
+                               message=f'The username {username} is already taken.')
+    else:
+      new_user = Profile(username=username, password=password, email=email, photofn=pp)
+
+      db.session.add(new_user)
+      db.session.commit()
+      return redirect(url_for('login'))
 
 
 @app.route('/logout/')
