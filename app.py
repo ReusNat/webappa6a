@@ -19,6 +19,7 @@ IMAGE_DIR = 'static/img/profilephotos'
 
 from models import Profile, Post, Like
 
+
 @app.before_first_request
 def app_init():
     imgdir = Path(IMAGE_DIR)
@@ -96,34 +97,37 @@ def new_user():
     e = request.form['email']
     pp = request.files['profile-pict']
     filename = secure_filename(pp.filename)
-    filepath = os.path.join(IMAGE_DIR, filename)
     exists = db.session.query(db.session.query(Profile).filter_by(username=un).exists()).scalar()
-
+    print(exists)
     if pp:
-      if username == "":
-        return render_template('new_user.html',
-                                message='Please enter a username.')
-      elif password == "":
-        return render_template('new_user.html',
-                                message='Please enter a password.')
-      elif email == "":
-        return render_template('new_user.html',
-                                message='Please enter an email.')
-      else:
-        if exists:
-          return render_template('new_user.html',
-                                 message=f'The username {username} is already taken.')
+        if un == "":
+            return render_template('new_user.html',
+                                   message='Please enter a username.')
+        elif pw == "":
+            return render_template('new_user.html',
+                                   message='Please enter a password.')
+        elif e == "":
+            return render_template('new_user.html',
+                                   message='Please enter an email.')
         else:
-          pp.save(filepath)
-          new_user = Profile(username=un, password=pw, email=e, photofn=filename)
-          db.session.add(new_user)
-          db.session.commit()
-          return redirect(url_for('login'))
+            if exists:
+                return render_template('new_user.html',
+                                       message=f'The username {un} is already taken.')
+            else:
+                name, extention = filename.split('.')
+                filename = name + un + '.' + extention
+                filepath = os.path.join(IMAGE_DIR, filename)
+                pp.save(filepath)
+                new_user = Profile(username=un, password=pw, email=e, photofn=filename)
+                db.session.add(new_user)
+                db.session.commit()
+                return redirect(url_for('login'))
     else:
-      return render_template('new_user.html',
-                             message='Please choose a profile picture.')
+        return render_template('new_user.html',
+                               message='Please choose a profile picture.')
 
     return abort(400)
+
 
 @app.route('/logout/')
 def logout():
