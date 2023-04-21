@@ -1,0 +1,18 @@
+body {
+  background-image: url('/static/img/background.jpg');
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+p {
+  color: white;
+}
+
+label {
+  color: white;
+}
+
+#head {
+  color: white;
+}
+
