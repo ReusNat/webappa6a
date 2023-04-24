@@ -113,7 +113,8 @@ def new_user_form():
 def get_posts():
     username = session['username']
     user = Profile.query.filter_by(username=username).first()
-    posts = Post.query.filter_by(profile_id=user.id) 
+    posts = list(map(lambda p: p.serialize(), Post.query.filter_by(profile_id=user.id)))
+    return jsonify(posts)
 
 
 @app.route('/api/posts/', methods=['POST'])

@@ -6,6 +6,17 @@ function createPost(post) {
   domTarget.prepend(html);
 }
 
+function getPosts(posts) {
+  let domTarget = $('#posts');
+  posts.forEach((post) => {
+    let html = '<div id="post" postid="' + post.id + '">';
+    html += '<p id="post-text">' + post.content + '</p>' +
+	    '<button id="like" postid="' + post.id + '">Like</button>';
+    domTarget.prepend(html);
+    
+  });
+}
+
 function error() {
   console.log('error');
 }
