@@ -6,9 +6,16 @@
 {% endblock %}
 
 {% block content %}
-
+<!--
 {% if message %}
 <strong>{{ message }}</strong>
+{% endif %}
+-->
+
+{% if message %}
+<ul id="messages" class="alert alert-danger" role="alert">
+    <li>{{ message }}</li>
+</ul>
 {% endif %}
 
 <form enctype='multipart/form-data' action="{{ url_for('new_user') }}" method="POST">

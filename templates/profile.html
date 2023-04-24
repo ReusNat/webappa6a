@@ -1,0 +1,31 @@
+{% extends "site.html" %}
+
+{% block title %}{{ user.username }}'s Profile{% endblock %}
+{% block head %}
+{{ super() }}
+{% endblock %}
+
+{% block content %}
+    {{ navbar([   ('Home', url_for('main')), 
+  	          ('Profile', url_for('get_profile')),
+  	          ('Logout', url_for('logout')),
+	      ]) }}
+<h1 id="head">{{ user.username }}</h1>
+<p>Email: {{ user.email }}</p>
+<img src="/static/img/profilephotos/{{ user.photofn }}">
+<br>
+<form id="post-form">
+<input type="text" name="content">
+<button id="create-post">Post</button>
+</form>
+<br>
+
+<div id="posts">
+
+</div>
+
+
+<script src="/static/js/profile.js"></script>
+
+
+{% endblock %}

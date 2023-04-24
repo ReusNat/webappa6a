@@ -85,9 +85,46 @@ def login():
                                messages=['Invalid username/password'])
 
 
+@app.route('/profile/', methods=['GET'])
+def get_profile():
+    username = session['username']
+    user = Profile.query.filter_by(username=username).first()
+    return render_template('profile.html',
+                           user=user)
+
+
+@app.route('/profile/<int:profile_id>/', methods=['GET'])
+def get_profile_by_id(profile_id):
+    user = Profile.query.get(profile_id)
+    if user == None:
+        return render_template('main.html', 
+                               message='That user does not exist')
+
+    return render_template('profile.html',
+                           user=user)
+    
+
 @app.route('/profile/new/', methods=['GET'])
 def new_user_form():
     return render_template('new_user.html')
+
+
+@app.route('/api/posts/', methods=['GET'])
+def get_posts():
+    username = session['username']
+    user = Profile.query.filter_by(username=username).first()
+    posts = Post.query.filter_by(profile_id=user.id) 
+
+
+@app.route('/api/posts/', methods=['POST'])
+def create_post():
+    content = request.form['content']
+    username = session['username']
+    user = Profile.query.filter_by(username=username).first()
+    post = Post(content=content, profile_id=user.id, likes=[])
+    db.session.add(post)
+    db.session.commit()
+    return jsonify(post.serialize())
 
 
 @app.route('/profile/', methods=['POST'])
@@ -98,15 +135,14 @@ def new_user():
     pp = request.files['profile-pict']
     filename = secure_filename(pp.filename)
     exists = db.session.query(db.session.query(Profile).filter_by(username=un).exists()).scalar()
-    print(exists)
     if pp:
-        if un == "":
+        if un == '':
             return render_template('new_user.html',
                                    message='Please enter a username.')
-        elif pw == "":
+        elif pw == '':
             return render_template('new_user.html',
                                    message='Please enter a password.')
-        elif e == "":
+        elif e == '':
             return render_template('new_user.html',
                                    message='Please enter an email.')
         else:
