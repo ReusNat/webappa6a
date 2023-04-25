@@ -42,7 +42,7 @@ def get_username():
 def authenticate(username, password):
     user_exists = db.session.query(db.session.query(Profile).filter_by(username=username).exists()).scalar()
     user = Profile.query.filter_by(username=username).first()
-    if username == 'cartman' and password == 'beefcake' or user_exists == True and user.password == password:
+    if user_exists and user.password == password:
         session['username'] = username
         return True
 
@@ -50,7 +50,9 @@ def authenticate(username, password):
 
 
 def is_secure_route(request):
-    return request.path not in ['/login/', '/logout/', '/profile/new/', '/profile/'] and \
+    if request.path == 'profile' and request.method == 'GET':
+        return True
+    return request.path not in ['/login/', '/logout/', '/profile/new/'] and \
         not request.path.startswith('/static/')
 
 
