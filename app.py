@@ -6,6 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.utils import secure_filename
 import os
 from pathlib import Path
+from models import Profile, Post, Like
 
 app = Flask(__name__)
 app.secret_key = b'bvfreheuwbvuorbvygfbchudevcgufegvy8ferhfu834jd3e9-fhcu90rfv'
@@ -16,8 +17,6 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 IMAGE_DIR = 'static/img/profilephotos'
-
-from models import Profile, Post, Like
 
 
 @app.before_first_request
@@ -40,7 +39,9 @@ def get_username():
 
 
 def authenticate(username, password):
-    user_exists = db.session.query(db.session.query(Profile).filter_by(username=username).exists()).scalar()
+    user_exists = db.session.query(
+            db.session.query(Profile).filter_by(
+                username=username).exists()).scalar()
     user = Profile.query.filter_by(username=username).first()
     if user_exists and user.password == password:
         session['username'] = username
@@ -50,7 +51,9 @@ def authenticate(username, password):
 
 
 def is_secure_route(request):
-    if request.path == 'profile' and request.method == 'GET':
+    if request.path == '/profile/' and request.method == 'GET':
+        return True
+    elif request.path == '/logout/':
         return True
     return request.path not in ['/login/', '/logout/', '/profile/new/'] and \
         not request.path.startswith('/static/')
@@ -98,13 +101,13 @@ def get_profile():
 @app.route('/profile/<int:profile_id>/', methods=['GET'])
 def get_profile_by_id(profile_id):
     user = Profile.query.get(profile_id)
-    if user == None:
-        return render_template('main.html', 
+    if user is None:
+        return render_template('main.html',
                                message='That user does not exist')
 
     return render_template('profile.html',
                            user=user)
-    
+
 
 @app.route('/profile/new/', methods=['GET'])
 def new_user_form():
@@ -115,7 +118,8 @@ def new_user_form():
 def get_posts():
     username = session['username']
     user = Profile.query.filter_by(username=username).first()
-    posts = list(map(lambda p: p.serialize(), Post.query.filter_by(profile_id=user.id)))
+    posts = list(map(lambda p: p.serialize(),
+                     Post.query.filter_by(profile_id=user.id)))
     return jsonify(posts)
 
 
@@ -137,7 +141,8 @@ def new_user():
     e = request.form['email']
     pp = request.files['profile-pict']
     filename = secure_filename(pp.filename)
-    exists = db.session.query(db.session.query(Profile).filter_by(username=un).exists()).scalar()
+    exists = db.session.query(
+            db.session.query(Profile).filter_by(username=un).exists()).scalar()
     if pp:
         if un == '':
             return render_template('new_user.html',
@@ -151,13 +156,15 @@ def new_user():
         else:
             if exists:
                 return render_template('new_user.html',
-                                       message=f'The username {un} is already taken.')
+                                       message=f'The username {un}\
+                                               is already taken.')
             else:
                 name, extention = filename.split('.')
                 filename = name + un + '.' + extention
                 filepath = os.path.join(IMAGE_DIR, filename)
                 pp.save(filepath)
-                new_user = Profile(username=un, password=pw, email=e, photofn=filename)
+                new_user = Profile(username=un, password=pw,
+                                   email=e, photofn=filename)
                 db.session.add(new_user)
                 db.session.commit()
                 return redirect(url_for('login'))
