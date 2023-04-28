@@ -1,42 +1,26 @@
-function likePost(post) {
-  let postTarget = $('#post[postid=' + post.id + ']');
-  let linkTarget = $('#status[postid=' + post.id + ']');
-  linkTarget.remove();
-
-  let html = '<p id="status" postid="' + post.id + '"><a href="#" id="unlike" postid="' + post.id + '">Unlike</a> ' + post.likes + '</p>';
-  postTarget.append(html);
-
-  $('#unlike[postid=' + post.id + ']').click(function() {
-    event.preventDefault();
-      $.ajax('/api/posts/' + post.id + '/unlike/', {
-        method: 'POST',
-	dataType: 'json',
-        processData: false,
-        contentType: false,
-        success: unlikePost,
-        error: error
-      });
+function likePost() {
+  console.log('ok');
+  let domTarget = $('#posts');
+  domTarget.remove();
+  let html = '<div id="posts"></div>';
+  $('#content').append(html);
+  $.ajax('/api/posts?profile_id=' + $('#profile_id').attr("value"), {
+    method: 'GET',
+    dataType: 'json',
+    success: getPosts,
+    error: error
   });
 }
-
-function unlikePost(post) {
-  let postTarget = $('#post[postid=' + post.id + ']');
-  let linkTarget = $('#status[postid=' + post.id + ']');
-  linkTarget.remove();
-
-  let html = '<p id="status" postid="' + post.id + '"><a href="#" id="like" postid="' + post.id + '">Like</a> ' + post.likes + '</p>';
-  postTarget.append(html);
-
-  $('#like[postid=' + post.id + ']').click(function() {
-    event.preventDefault();
-      $.ajax('/api/posts/' + post.id + '/like/', {
-        method: 'POST',
-	dataType: 'json',
-        processData: false,
-        contentType: false,
-        success: likePost,
-        error: error
-      });
+function unlikePost() {
+  let domTarget = $('#posts');
+  domTarget.remove();
+  let html = '<div id="posts"></div>';
+  $('#content').append(html);
+  $.ajax('/api/posts?profile_id=' + $('#profile_id').attr("value"), {
+    method: 'GET',
+    dataType: 'json',
+    success: getPosts,
+    error: error
   });
 }
 
@@ -44,8 +28,17 @@ function createPost(post) {
   let domTarget = $('#posts');
   let html = '<div id="post" postid="' + post.id + '">' +
              '<p id="post-text">' + post.content + '</p>';
-  html += '<p id="status" postid="' + post.id + '"><a href="#" id="like" postid="' + post.id + '">Like</a> ' + post.likes + '</p>';
+  if ($('#profile_id').attr("value") in post.likedBy) {
+    html += '<p id="status" postid="' + post.id + '"><a href="#" id="unlike" postid="' + post.id + '">Unlike</a>' + '<a href="#" id="likes" postid="' + post.id + '">' + post.numLikes + '</a></p>';
+  } else {
+    html += '<p id="status" postid="' + post.id + '"><a href="#" id="like" postid="' + post.id + '">Like</a>' + '<a href="#" id="likes" postid="' + post.id + '">' + post.numLikes + '</a></p>';
+  }
   domTarget.prepend(html);
+
+  $('#likes[postid=' + post.id + ']').click(function() {
+    event.preventDefault();
+    console.log(post.likedBy);
+  });
 
 
   $('#like[postid=' + post.id + ']').click(function() {
@@ -104,7 +97,7 @@ $(document).ready(function() {
     });
   });
 
-  $.ajax('/api/posts?profile_id=' + $('#profile_id').attr("value") , {
+  $.ajax('/api/posts?profile_id=' + $('#profile_id').attr("value"), {
     method: 'GET',
     dataType: 'json',
     success: getPosts,

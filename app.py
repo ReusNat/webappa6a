@@ -14,10 +14,9 @@ sqlite_uri = 'sqlite:///' + os.path.abspath(os.path.curdir) + '/profiles.db'
 app.config['SQLALCHEMY_DATABASE_URI'] = sqlite_uri
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
+from models import Profile, Post, Like
 
 IMAGE_DIR = 'static/img/profilephotos'
-
-from models import Profile, Post, Like
 
 
 @app.before_first_request
@@ -40,9 +39,11 @@ def get_username():
 
 
 def authenticate(username, password):
-    user_exists = db.session.query(db.session.query(Profile).filter_by(username=username).exists()).scalar()
+    user_exists = db.session.query(
+            db.session.query(Profile).filter_by(
+                username=username).exists()).scalar()
     user = Profile.query.filter_by(username=username).first()
-    if username == 'cartman' and password == 'beefcake' or user_exists == True and user.password == password:
+    if user_exists and user.password == password:
         session['username'] = username
         return True
 
@@ -50,7 +51,11 @@ def authenticate(username, password):
 
 
 def is_secure_route(request):
-    return request.path not in ['/login/', '/logout/', '/profile/new/', '/profile/'] and \
+    if request.path == '/profile/' and request.method == 'GET':
+        return True
+    elif request.path == '/logout/':
+        return True
+    return request.path not in ['/login/', '/logout/', '/profile/new/'] and \
         not request.path.startswith('/static/')
 
 
@@ -96,13 +101,13 @@ def get_profile():
 @app.route('/profile/<int:profile_id>/', methods=['GET'])
 def get_profile_by_id(profile_id):
     user = Profile.query.get(profile_id)
-    if user == None:
-        return render_template('main.html', 
+    if user is None:
+        return render_template('main.html',
                                message='That user does not exist')
 
     return render_template('profile.html',
                            user=user)
-    
+
 
 @app.route('/profile/new/', methods=['GET'])
 def new_user_form():
@@ -134,6 +139,7 @@ def like_post(post_id):
     db.session.commit()
     print('liked post')
     return jsonify(post.serialize())
+
 
 @app.route('/api/posts/<int:post_id>/unlike/', methods=['POST'])
 def unlike_post(post_id):
@@ -167,7 +173,8 @@ def new_user():
     e = request.form['email']
     pp = request.files['profile-pict']
     filename = secure_filename(pp.filename)
-    exists = db.session.query(db.session.query(Profile).filter_by(username=un).exists()).scalar()
+    exists = db.session.query(
+            db.session.query(Profile).filter_by(username=un).exists()).scalar()
     if pp:
         if un == '':
             return render_template('new_user.html',
@@ -181,13 +188,15 @@ def new_user():
         else:
             if exists:
                 return render_template('new_user.html',
-                                       message=f'The username {un} is already taken.')
+                                       message=f'The username {un}\
+                                               is already taken.')
             else:
                 name, extention = filename.split('.')
                 filename = name + un + '.' + extention
                 filepath = os.path.join(IMAGE_DIR, filename)
                 pp.save(filepath)
-                new_user = Profile(username=un, password=pw, email=e, photofn=filename)
+                new_user = Profile(username=un, password=pw,
+                                   email=e, photofn=filename)
                 db.session.add(new_user)
                 db.session.commit()
                 return redirect(url_for('login'))
