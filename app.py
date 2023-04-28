@@ -113,8 +113,40 @@ def new_user_form():
 def get_posts():
     username = session['username']
     user = Profile.query.filter_by(username=username).first()
-    posts = list(map(lambda p: p.serialize(), Post.query.filter_by(profile_id=user.id)))
+    the_id = user.id
+
+    if 'profile_id' in request.args:
+        the_id = request.args['profile_id']
+
+    posts = list(map(lambda p: p.serialize(), Post.query.filter_by(profile_id=the_id)))
     return jsonify(posts)
+
+
+@app.route('/api/posts/<int:post_id>/like/', methods=['POST'])
+def like_post(post_id):
+    post = Post.query.get(post_id)
+    username = session['username']
+    user = Profile.query.filter_by(username=username).first()
+
+    like = Like(profile_id=user.id, post_id=post_id)
+
+    db.session.add(like)
+    db.session.commit()
+    print('liked post')
+    return jsonify(post.serialize())
+
+@app.route('/api/posts/<int:post_id>/unlike/', methods=['POST'])
+def unlike_post(post_id):
+    post = Post.query.get(post_id)
+    username = session['username']
+    user = Profile.query.filter_by(username=username).first()
+
+    like = Like.query.filter_by(post_id=post_id, profile_id=user.id).first()
+
+    db.session.delete(like)
+    db.session.commit()
+    print('deleted like')
+    return jsonify(post.serialize())
 
 
 @app.route('/api/posts/', methods=['POST'])
