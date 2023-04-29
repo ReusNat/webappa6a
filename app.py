@@ -55,7 +55,7 @@ def is_secure_route(request):
         return True
     elif request.path == '/logout/':
         return True
-    return request.path not in ['/login/', '/logout/', '/profile/new/'] and \
+    return request.path not in ['/login/', '/logout/', '/profile/new/', '/profile/'] and \
         not request.path.startswith('/static/')
 
 
@@ -95,18 +95,22 @@ def get_profile():
     username = session['username']
     user = Profile.query.filter_by(username=username).first()
     return render_template('profile.html',
-                           user=user)
+                           user=user, 
+                           profile_id=user.id)
 
 
 @app.route('/profile/<int:profile_id>/', methods=['GET'])
 def get_profile_by_id(profile_id):
+    username = session['username']
+    currUser = Profile.query.filter_by(username=username).first()
     user = Profile.query.get(profile_id)
     if user is None:
         return render_template('main.html',
                                message='That user does not exist')
 
     return render_template('profile.html',
-                           user=user)
+                           user=user,
+                           profile_id=currUser.id)
 
 
 @app.route('/profile/new/', methods=['GET'])
@@ -137,7 +141,6 @@ def like_post(post_id):
 
     db.session.add(like)
     db.session.commit()
-    print('liked post')
     return jsonify(post.serialize())
 
 
@@ -151,7 +154,6 @@ def unlike_post(post_id):
 
     db.session.delete(like)
     db.session.commit()
-    print('deleted like')
     return jsonify(post.serialize())
 
 
