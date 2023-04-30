@@ -33,3 +33,9 @@ label {
 #likes-p {
   color: black;
 }
+
+#post-confirm {
+  background-color: #a134eb;
+  width: 190px;
+  color: white;
+}
