@@ -10,7 +10,6 @@ function error() {
 
 $(document).ready(function() {
   $('#create-post').click(function(evt) {
-    console.log('button pressed');
     let form = $('#post-form')[0];
     let data = new FormData(form);
     evt.preventDefault();

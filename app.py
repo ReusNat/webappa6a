@@ -169,7 +169,6 @@ def get_likes(post_id):
 
 @app.route('/api/posts/', methods=['POST'])
 def create_post():
-    print('creating post!')
     content = request.form['content']
     username = session['username']
     user = Profile.query.filter_by(username=username).first()
