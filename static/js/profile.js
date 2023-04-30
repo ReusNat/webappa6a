@@ -46,7 +46,16 @@ function createPost(post) {
 
   $('#likes[postid=' + post.id + ']').click(function() {
     event.preventDefault();
-    console.log(post.likedBy);
+    $.ajax('/api/posts/' + post.id + '/likes/', {
+        method: 'GET',
+        dataType: 'json',
+        processData: false,
+        contentType: false,
+        success: (likes) =>{
+            console.log(likes);
+        },
+        error: error
+    });
   });
 
 

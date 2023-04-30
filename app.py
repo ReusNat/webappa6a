@@ -157,6 +157,16 @@ def unlike_post(post_id):
     return jsonify(post.serialize())
 
 
+@app.route('/api/posts/<int:post_id>/likes/', methods=['GET'])
+def get_likes(post_id):
+    post = Post.query.get(post_id)
+    likes = post.liked_by()
+    likes_uns = []
+    for like in likes:
+        likes_uns.append(Profile.query.get(like).username)
+    return jsonify(likes_uns)
+
+
 @app.route('/api/posts/', methods=['POST'])
 def create_post():
     content = request.form['content']
