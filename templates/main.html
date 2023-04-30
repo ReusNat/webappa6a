@@ -15,4 +15,12 @@
 {% if message %}
 <h2 id="head">{{ message }}</h2>
 {% endif %}
+<br>
+<form id="post-form">
+<input type="text" name="content">
+<button id="create-post">Post</button>
+</form>
+<br>
+<div id='post-confirm'></div>
+
 {% endblock %}
