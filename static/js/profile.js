@@ -27,7 +27,16 @@ function createPost(post) {
   let domTarget = $('#posts');
   let html = '<div id="post" postid="' + post.id + '">' +
              '<p id="post-text">' + post.content + '</p>';
-  html += '<p id="status" postid="' + post.id + '"><a href="#" id="like" postid="' + post.id + '">Like</a>' + ' ' + '<a href="#" id="likes" postid="' + post.id + '">' + post.numLikes + '</a></p>';
+  html += '<p id="status" postid="' + post.id + '"><a href="#" id="like" postid="' + post.id + '">Like</a>' + ' ' + '<a href="#" id="likes" data-bs-toggle="modal" data-bs-target="#likesModal" postid="' + post.id + '">' + post.numLikes + '</a></p>';
+  html += '<div class="modal fade" id="likesModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">';
+  html += '<div class="modal-dialog">';
+  html += '<div class="modal-content">';
+  html += '<div class="modal-header"><h1 class="modal-title fs-5" id="exampleModalLabel">Likes</h1>';
+  html += '<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>';
+  html += ' <div class="modal-body"></div>';
+  html += '<div class="modal-footer">'
+  html += '<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>';
+  html += '</div></div></div></div>';
   if (post.numLikes == 0) {
     html = '<div id="post" postid="' + post.id + '">' +
            '<p id="post-text">' + post.content + '</p>';
@@ -38,7 +47,16 @@ function createPost(post) {
     if (Number($('#curr_user').attr("value")) == index) {
       html = '<div id="post" postid="' + post.id + '">' +
              '<p id="post-text">' + post.content + '</p>';
-      html += '<p id="status" postid="' + post.id + '"><a href="#" id="unlike" postid="' + post.id + '">Unlike</a>' + ' ' + '<a href="#" id="likes" postid="' + post.id + '">' + post.numLikes + '</a></p>';
+      html += '<p id="status" postid="' + post.id + '"><a href="#" id="unlike" postid="' + post.id + '">Unlike</a>' + ' ' + '<a href="#" id="likes" data-bs-toggle="modal" data-bs-target="#likesModal" postid="' + post.id + '">' + post.numLikes + '</a></p>';
+      html += '<div class="modal fade" id="likesModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">';
+      html += '<div class="modal-dialog">';
+      html += '<div class="modal-content">';
+      html += '<div class="modal-header"><h1 class="modal-title fs-5" id="exampleModalLabel">Likes</h1>';
+      html += '<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>';
+      html += ' <div class="modal-body"></div>';
+      html += '<div class="modal-footer">'
+      html += '<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>';
+      html += '</div></div></div></div>';
     }
   });
   domTarget.prepend(html);
@@ -52,6 +70,11 @@ function createPost(post) {
         processData: false,
         contentType: false,
         success: (likes) =>{
+            let domTarget = $('.modal-body');
+            likes.forEach((like) => {
+                console.log(like);
+                domTarget.append('<p id="likes-p">' + like + '</p><br>');
+            });
             console.log(likes);
         },
         error: error
