@@ -27,7 +27,8 @@ function createPost(post) {
   let domTarget = $('#posts');
   let html = '<div id="post" postid="' + post.id + '">' +
              '<p id="post-text">' + post.content + '</p>';
-  html += '<p id="status" postid="' + post.id + '"><a href="#" id="like" postid="' + post.id + '">Like</a>' + ' ' + '<a href="#" id="likes" data-bs-toggle="modal" data-bs-target="#likesModal" postid="' + post.id + '">' + post.numLikes + '</a></p>';
+  html += '<p id="status" postid="' + post.id + '"><a href="#" id="like" postid="' + post.id + '">Like</a>' + ' ' + '<a href="#" id="likes" data-bs-toggle="modal" data-bs-target="#likesModal" postid="' +
+        post.id + '">' + post.numLikes + '</a></p>';
   html += '<div class="modal fade" id="likesModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">';
   html += '<div class="modal-dialog">';
   html += '<div class="modal-content">';
@@ -47,7 +48,8 @@ function createPost(post) {
     if (Number($('#curr_user').attr("value")) == index) {
       html = '<div id="post" postid="' + post.id + '">' +
              '<p id="post-text">' + post.content + '</p>';
-      html += '<p id="status" postid="' + post.id + '"><a href="#" id="unlike" postid="' + post.id + '">Unlike</a>' + ' ' + '<a href="#" id="likes" data-bs-toggle="modal" data-bs-target="#likesModal" postid="' + post.id + '">' + post.numLikes + '</a></p>';
+      html += '<p id="status" postid="' + post.id + '"><a href="#" id="unlike" postid="' + post.id + '">Unlike</a>' + ' ' +
+            '<a href="#" id="likes" data-bs-toggle="modal" data-bs-target="#likesModal" postid="' + post.id + '">' + post.numLikes + '</a></p>';
       html += '<div class="modal fade" id="likesModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">';
       html += '<div class="modal-dialog">';
       html += '<div class="modal-content">';
