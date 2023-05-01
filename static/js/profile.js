@@ -74,7 +74,7 @@ function createPost(post) {
         success: (likes) =>{
             let domTarget = $('.modal-body');
             likes.forEach((like) => {
-                console.log(like);
+                domTarget.empty()
                 domTarget.append('<p id="likes-p">' + like + '</p><br>');
             });
             console.log(likes);
